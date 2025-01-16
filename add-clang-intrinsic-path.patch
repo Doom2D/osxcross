@@ -1,8 +1,8 @@
 diff --git a/target.cpp b/target.cpp
-index 82bf65c..501a2ef 100644
+index 7131390..0839618 100644
 --- a/target.cpp
 +++ b/target.cpp
-@@ -348,7 +348,7 @@ bool Target::findClangIntrinsicHeaders(std::string &path) {
+@@ -370,7 +370,7 @@ bool Target::findClangIntrinsicHeaders(std::string &path) {
              auto &file = dir;
  
              intrindir = dir.str();
@@ -11,7 +11,7 @@ index 82bf65c..501a2ef 100644
  
              if (fileExists(file.str())) {
                if (cv > *clangversion) {
-@@ -361,13 +361,9 @@ bool Target::findClangIntrinsicHeaders(std::string &path) {
+@@ -383,13 +383,9 @@ bool Target::findClangIntrinsicHeaders(std::string &path) {
              return false;
            };
  
@@ -27,23 +27,23 @@ index 82bf65c..501a2ef 100644
          }
          return true;
        }
-@@ -389,6 +385,11 @@ do {                                                                           \
+@@ -411,6 +407,11 @@ do {                                                                           \
  #define TRYDIR2(libdir) TRYDIR(clangbindir, libdir)
  #define TRYDIR3(libdir) TRYDIR(std::string(), libdir)
  
-+  char *env = getenv("OSXCROSS_CLANG_INTRINSIC_PATH");
-+  if (env != NULL) {
-+    TRYDIR3(env);
-+  }
++char *env = getenv("OSXCROSS_CLANG_INTRINSIC_PATH");
++if (env != NULL) {
++  TRYDIR3(env);
++}
 +
  #ifdef __CYGWIN__
  #ifdef __x86_64__
    TRYDIR2("/../lib/clang/x86_64-pc-cygwin");
-@@ -722,7 +722,7 @@ bool Target::setup() {
-         return false;
-       }
+@@ -732,6 +733,7 @@ bool Target::setup() {
+     tmp = "-mlinker-version=";
+     tmp += getLinkerVersion();
  
--      fargs.push_back("-isystem");
-+      fargs.push_back("-resource-dir");
-       fargs.push_back(tmp);
-     }
++    fargs.push_back("-resource-dir");
+     fargs.push_back(tmp);
+     tmp.clear();
+ 

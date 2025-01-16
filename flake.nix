@@ -116,18 +116,23 @@
           src = pkgs.fetchFromGitHub {
             owner = "tpoechtrager";
             repo = "osxcross";
-            rev = "be2b79f444aa0b43b8695a4fb7b920bf49ecc01c";
-            sha256 = "sha256-3/dXHrzuLFXFL2h+P4hpCN1ejCp0RIcoZVISdFv9CVs=";
+            rev = "29fe6dd35522073c9df5800f8cd1feb4b9a993a8";
+            sha256 = "sha256-2ND819Ns8HlpRwpOfwHoNbt3cqfBDrN7bBz3iZrJpSo=";
           } + "/wrapper";
 
+          
           patches = [
+            /*
             ./add-isystem.patch
             ./set_default_target.patch
             ./add-clang-intrinsic-path.patch
             ./ignore-target-arg.patch
             ./pass-intrinsic-on-darwin.patch
             ./add-osxcross-linkerpath.patch
+            */
+            ./add-clang-intrinsic-path.patch
           ];
+          
 
           buildInputs = pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.CoreServices;
           makeFlags = [ "LINKER_VERSION=609" ];
