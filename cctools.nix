@@ -1,7 +1,8 @@
 { lib, clangStdenv, fetchFromGitHub, autoconf, automake, libtool, autoreconfHook
 , installShellFiles
 , libuuid
-, libtapi
+, pkgs
+, libtapi, libdispatch
 , libobjc ? null
 , darwin_target ? "darwin19"
 }:
@@ -18,19 +19,25 @@ in
 
 clangStdenv.mkDerivation {
   pname = "${targetPrefix}cctools-port";
-  version = "973.0.1";
+  version = "1010.6";
 
   src = fetchFromGitHub {
     owner  = "tpoechtrager";
     repo   = "cctools-port";
+    /*
     rev    = "6540086c5e12e9c1649fed524b527d8c1793ddc0";
     sha256 = "sha256-s0Pzbk+h23UYlhqQkOt6NbvPSi6aSjk/FVY0VkbPQ0o=";
+    */
+
+    rev    = "81f205e8ca6bbf2fdbcb6948132454fd1f97839e";
+    sha256 = "sha256-a5ip0e/nQrCOEwIO3qrNGP8246cjEXNPk2/TQnccZU4=";
+
   };
 
   outputs = [ "out" "dev" "man" ];
 
-  nativeBuildInputs = [ autoconf automake libtool autoreconfHook installShellFiles ];
-  buildInputs = [ libuuid libtapi ]
+  nativeBuildInputs = [ autoconf automake libtool autoreconfHook installShellFiles pkgs.darwin.libdispatch ];
+  buildInputs = [ libuuid libtapi libdispatch ]
     ++ lib.optionals stdenv.isDarwin [ libobjc ];
 
   # patches = [ ./ld-ignore-rpath-link.patch ./ld-rpath-nonfinal.patch ];
