@@ -8,7 +8,7 @@
     flake-utils.url      = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }: {
-    lib.toolchain = { llvmPackages, osxcross-wrapper, macos_sdk, makeWrapper, runCommand }: runCommand "osxcross-toolchain" {
+    lib.toolchain = { llvmPackages, osxcross-wrapper, macos_sdk, cctools, makeWrapper, runCommand }: runCommand "osxcross-toolchain" {
       buildInputs = [ makeWrapper ];
       passthru = {
         inherit macos_sdk;
@@ -48,7 +48,7 @@
         if ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
             "$out/bin/x86_64h-apple-$TARGET-$1" --argv0 "x86_64h-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
-      
+
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
             "$out/bin/aarch64-apple-$TARGET-$1" --argv0 "aarch64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
@@ -56,16 +56,16 @@
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
             "$out/bin/arm64e-apple-$TARGET-$1" --argv0 "arm64e-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
         fi
-      
+
         if [ $# -ge 2 ] && [ $2 -eq 2 ]; then
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
             "$out/bin/o64-$1" --argv0 "o64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
-      
+
           if ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
             makeWrapper "${osxcross-wrapper}/bin/wrapper" \
               "$out/bin/o64h-$1" --argv0 "o64h-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           fi
-      
+
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
             "$out/bin/oa64-$1" --argv0 "oa64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
@@ -81,7 +81,7 @@
       create_wrapper_link clang++-gstdc++ 2
       create_wrapper_link cc
       create_wrapper_link c++
-      
+
       create_wrapper_link osxcross 1
       create_wrapper_link osxcross-conf 1
       create_wrapper_link osxcross-env 1
@@ -94,7 +94,12 @@
       create_wrapper_link xcrun 1
       create_wrapper_link xcodebuild 1
 
-      # TODO: we may want ld, ar, ranlib and a few others here.
+      for arch in "x86_64h" "x86_64" "aarch64" "arm64" "arm64e" ; do
+        for CCTOOL in ${cctools}/bin/*; do
+          CCTOOL_FNAME=$(basename $CCTOOL)
+          ln -s "$CCTOOL" "$out/bin/$(echo "$CCTOOL_FNAME" | sed "s/x86_64/$arch/g" | sed "s/darwin20.4/$TARGET/g")"
+        done
+      done
     '';
   } // flake-utils.lib.eachDefaultSystem (system:
     let
@@ -102,8 +107,8 @@
       selfpkgs = self.packages.${system};
     in
       rec {
-        #packages.libtapi = pkgs.callPackage ./libtapi.nix { };
-        #packages.cctools = pkgs.callPackage ./cctools.nix { libtapi = selfpkgs.libtapi; darwin_target = "darwin20.4"; };
+        packages.libtapi = pkgs.callPackage ./libtapi.nix { };
+        packages.cctools = pkgs.callPackage ./cctools.nix { libtapi = selfpkgs.libtapi; darwin_target = "darwin20.4"; };
         packages.osxcross-wrapper = pkgs.stdenv.mkDerivation {
           name = "osxcross-wrapper";
           version = "";
@@ -170,9 +175,9 @@
             osx_version_min = "10.13";
           };
         };
-        packages.toolchain_11_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_11_3; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_11_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_11_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_13; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain = selfpkgs.toolchain_11_3;
       });
 }
