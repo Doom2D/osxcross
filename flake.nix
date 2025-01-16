@@ -120,7 +120,7 @@
             sha256 = "sha256-2ND819Ns8HlpRwpOfwHoNbt3cqfBDrN7bBz3iZrJpSo=";
           } + "/wrapper";
 
-          
+
           patches = [
             /*
             ./add-isystem.patch
@@ -132,7 +132,7 @@
             */
             ./add-clang-intrinsic-path.patch
           ];
-          
+
 
           buildInputs = pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.CoreServices;
           makeFlags = [ "LINKER_VERSION=609" ];
@@ -193,10 +193,23 @@
             osx_version_min = "10.13";
           };
         };
+        packages.macossdk_15_2 = pkgs.fetchzip {
+          url = "https://github.com/joseluisq/macosx-sdks/releases/download/15.2/MacOSX15.2.sdk.tar.xz";
+          sha256 = "sha256-I35yUUjM8zGSaqE/vYz03YCUhpR8uIG1uwJTJvcF8jk=";
+          passthru = {
+            version = "15.2";
+            target = "darwin22.1";
+            x86_64h_supported = true;
+            i386_supported = false;
+            arm_supported = true;
+            osx_version_min = "10.13";
+          };
+        };
         packages.toolchain_11_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_11_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain_13_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_15_2 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_15_2; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain = selfpkgs.toolchain_11_3;
       });
 }
