@@ -105,6 +105,8 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       selfpkgs = self.packages.${system};
+      # https://gitlab.com/freepascal.org/fpc/source/-/merge_requests/887
+      preferedLlvmPackages = pkgs.llvmPackages_17;
     in
       rec {
         packages.libtapi = pkgs.callPackage ./libtapi.nix { };
@@ -205,11 +207,11 @@
             osx_version_min = "10.13";
           };
         };
-        packages.toolchain_11_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_11_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_13_3 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_15_2 = self.lib.toolchain { llvmPackages = pkgs.llvmPackages_18; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_15_2; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_11_3 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_11_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_13_3 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_15_2 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_15_2; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain = selfpkgs.toolchain_11_3;
       });
 }
