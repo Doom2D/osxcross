@@ -2,7 +2,7 @@
 , installShellFiles
 , libuuid
 , pkgs
-, libdispatch
+, libtapi, libdispatch
 , libobjc ? null
 , darwin_target ? "darwin19"
 }:
@@ -37,7 +37,7 @@ clangStdenv.mkDerivation {
   outputs = [ "out" "dev" "man" ];
 
   nativeBuildInputs = [ autoconf automake libtool autoreconfHook installShellFiles pkgs.darwin.libdispatch ];
-  buildInputs = [ libuuid libdispatch ]
+  buildInputs = [ libuuid libtapi libdispatch ]
     ++ lib.optionals stdenv.isDarwin [ libobjc ];
 
   # patches = [ ./ld-ignore-rpath-link.patch ./ld-rpath-nonfinal.patch ];
@@ -53,7 +53,7 @@ clangStdenv.mkDerivation {
   configurePlatforms = [ "build" "host" ];
     # We pass --target explicitly.
     # ++ lib.optional (stdenv.targetPlatform != stdenv.hostPlatform) "target";
-  configureFlags = [ "--disable-clang-as" "--target=x86_64-apple-${darwin_target}" ];
+  configureFlags = [ "--disable-clang-as" "--target=x86_64-apple-${darwin_target}" "--with-libtapi=${libtapi}" "--enable-tapi-support" ];
 
   postPatch = lib.optionalString stdenv.hostPlatform.isDarwin ''
     substituteInPlace cctools/Makefile.am --replace libobjc2 ""
