@@ -111,7 +111,7 @@
       rec {
         packages.libtapi = pkgs.callPackage ./libtapi.nix { };
         packages.libdispatch = pkgs.callPackage ./libdispatch.nix { };
-        packages.cctools = pkgs.callPackage ./cctools.nix { libdispatch = selfpkgs.libdispatch; darwin_target = "darwin20.4"; };
+        packages.cctools = pkgs.callPackage ./cctools.nix { libtapi = selfpkgs.libtapi; libdispatch = selfpkgs.libdispatch; darwin_target = "darwin20.4"; };
         packages.osxcross-wrapper = pkgs.stdenv.mkDerivation {
           name = "osxcross-wrapper";
           version = "";
