@@ -8,7 +8,7 @@
     flake-utils.url      = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }: {
-    lib.toolchain = { llvmPackages, osxcross-wrapper, macos_sdk, cctools, makeWrapper, runCommand }: runCommand "osxcross-toolchain" {
+    lib.toolchain = { llvmPackages, osxcross-wrapper, macos_sdk, cctools, symlinkJoin, makeWrapper, runCommand }: let lib = nixpkgs.lib; paths = symlinkJoin {name = "clang-osxcross-wrapper"; paths = ["${llvmPackages.clang-unwrapped}/bin" "${llvmPackages.libllvm}/bin"];}; in runCommand "osxcross-toolchain" {
       buildInputs = [ makeWrapper ];
       passthru = {
         inherit macos_sdk;
@@ -39,37 +39,37 @@
 
         if [ $# -ge 2 ] && [ $2 -eq 1 ]; then
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/$1" --argv0 "$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/$1" --argv0 "$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
         fi
 
         makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-          "$out/bin/x86_64-apple-$TARGET-$1" --argv0 "x86_64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+          "$out/bin/x86_64-apple-$TARGET-$1" --argv0 "x86_64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
 
         if ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/x86_64h-apple-$TARGET-$1" --argv0 "x86_64h-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/x86_64h-apple-$TARGET-$1" --argv0 "x86_64h-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
 
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/aarch64-apple-$TARGET-$1" --argv0 "aarch64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/aarch64-apple-$TARGET-$1" --argv0 "aarch64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/arm64-apple-$TARGET-$1" --argv0 "arm64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/arm64-apple-$TARGET-$1" --argv0 "arm64-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/arm64e-apple-$TARGET-$1" --argv0 "arm64e-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/arm64e-apple-$TARGET-$1" --argv0 "arm64e-apple-$TARGET-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
         fi
 
         if [ $# -ge 2 ] && [ $2 -eq 2 ]; then
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/o64-$1" --argv0 "o64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/o64-$1" --argv0 "o64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
 
           if ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
             makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-              "$out/bin/o64h-$1" --argv0 "o64h-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+              "$out/bin/o64h-$1" --argv0 "o64h-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           fi
 
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/oa64-$1" --argv0 "oa64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/oa64-$1" --argv0 "oa64-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
           makeWrapper "${osxcross-wrapper}/bin/wrapper" \
-            "$out/bin/oa64e-$1" --argv0 "oa64e-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${llvmPackages.clang-unwrapped}/bin/" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
+            "$out/bin/oa64e-$1" --argv0 "oa64e-$1" --prefix PATH : $out/bin --set OSXCROSS_CLANG_INTRINSIC_PATH "${llvmPackages.clang-unwrapped.lib}/lib/clang/" --set OSXCROSS_TARGET "$TARGET" --set OSXCROSS_SDKROOT "$SDK_ROOT" --prefix PATH : "${paths}" --set OSXCROSS_LINKERPATH "${llvmPackages.lld}/bin/ld64.lld"
         fi
       }
 
@@ -81,6 +81,7 @@
       create_wrapper_link clang++-gstdc++ 2
       create_wrapper_link cc
       create_wrapper_link c++
+      create_wrapper_link dsymutil
 
       create_wrapper_link osxcross 1
       create_wrapper_link osxcross-conf 1
@@ -211,7 +212,7 @@
         packages.toolchain_12_3 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_12_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain_13_0 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_0; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
         packages.toolchain_13_3 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_13_3; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
-        packages.toolchain_15_2 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_15_2; cctools = selfpkgs.cctools; makeWrapper = pkgs.makeWrapper; runCommand = pkgs.runCommand; };
+        packages.toolchain_15_2 = self.lib.toolchain { llvmPackages = preferedLlvmPackages; osxcross-wrapper = selfpkgs.osxcross-wrapper; macos_sdk = selfpkgs.macossdk_15_2; cctools = selfpkgs.cctools; inherit (pkgs) runCommand makeWrapper symlinkJoin; };
         packages.toolchain = selfpkgs.toolchain_11_3;
       });
 }
